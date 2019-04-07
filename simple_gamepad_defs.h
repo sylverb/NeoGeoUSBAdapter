@@ -52,9 +52,9 @@
 /* this function configures the hardware for the desired usage */
 void simple_gamepad_configure(void);
 /* this function reads the gamepad state from the hardware */
-uint8_t simple_gampad_read_buttons(void);
+uint8_t simple_gampad_read_buttons(int8_t controller);
 /* this function transmits the state report */
-int8_t usb_simple_gamepad_send(void);
+int8_t usb_simple_gamepad_send(int8_t controller);
 
 
 /* button array byte size, 1 bit for each button */
@@ -71,7 +71,7 @@ typedef struct
 
 } gamepad_state;
 
-extern gamepad_state g_gamepadState;
+extern gamepad_state g_gamepadState[CONTROLLER_COUNT];
 
 // these are used to set the axis values
 #define AXIS_CENTER     ((uint8_t)0x00)
@@ -93,6 +93,7 @@ static const uint8_t PROGMEM gamepad_hid_report_desc[] = {
     0x09, 0x05,         // USAGE (Game Pad)
     0xa1, 0x01,         // COLLECTION (Application)
     0xa1, 0x00,         //   COLLECTION (Physical)
+    0x85, 0x01,         //     REPORT_ID (1)
     0x09, 0x30,         //     USAGE (X)
     0x09, 0x31,         //     USAGE (Y)
     0x15, 0x81,         //     LOGICAL_MINIMUM (-127)
@@ -114,7 +115,37 @@ static const uint8_t PROGMEM gamepad_hid_report_desc[] = {
     0x81, 0x03,         //     INPUT (Cnst,Var,Abs)
 #endif
     0xc0,               //   END_COLLECTION
-    0xc0                // END_COLLECTION
+    0xc0,               // END_COLLECTION
+
+#if CONTROLLER_COUNT >= 2
+    0x05, 0x01,         // USAGE_PAGE (Generic Desktop)
+    0x09, 0x05,         // USAGE (Game Pad)
+    0xa1, 0x01,         // COLLECTION (Application)
+    0xa1, 0x00,         //   COLLECTION (Physical)
+    0x85, 0x02,         //     REPORT_ID (2)
+    0x09, 0x30,         //     USAGE (X)
+    0x09, 0x31,         //     USAGE (Y)
+    0x15, 0x81,         //     LOGICAL_MINIMUM (-127)
+    0x25, 0x7f,         //     LOGICAL_MAXIMUM (127)
+    0x75, 0x08,         //     REPORT_SIZE (8)
+    0x95, 0x02,         //     REPORT_COUNT (2)
+    0x81, 0x02,         //     INPUT (Data,Var,Abs)
+    0x05, 0x09,         //     USAGE_PAGE (Button)
+    0x19, 0x01,         //     USAGE_MINIMUM (Button 1)
+    0x29, BUTTON_COUNT, //     USAGE_MAXIMUM (Button N)
+    0x15, 0x00,         //     LOGICAL_MINIMUM (0)
+    0x25, 0x01,         //     LOGICAL_MAXIMUM (1)
+    0x95, BUTTON_COUNT, //     REPORT_COUNT (Number of Buttons)
+    0x75, 0x01,         //     REPORT_SIZE (1)
+    0x81, 0x02,         //     INPUT (Data,Var,Abs)
+#if PADDING_BITS != 0
+    0x95, PADDING_BITS, //     REPORT_COUNT (Padding bits to fit to uint8_t)
+    0x75, 0x01,         //     REPORT_SIZE (1)
+    0x81, 0x03,         //     INPUT (Cnst,Var,Abs)
+#endif
+    0xc0,               //   END_COLLECTION
+    0xc0,               // END_COLLECTION
+#endif // if CONTROLLER_COUNT >= 2
 };
 
 

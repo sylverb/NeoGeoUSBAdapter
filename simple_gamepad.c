@@ -50,6 +50,9 @@
 int main(void)
 {
     uint8_t noChangeCounter = 0;
+    uint8_t controller;
+    uint8_t stateChanged;
+    uint8_t stateChangedController[CONTROLLER_COUNT];
 
     // set for 16 MHz clock
     CPU_PRESCALE(0);
@@ -71,17 +74,29 @@ int main(void)
     _delay_ms(1000);
 
     // Initialize and transmit initial state
-    simple_gampad_read_buttons();
-    usb_simple_gamepad_send();
+    for (controller = 0; controller < CONTROLLER_COUNT; controller++) {
+        simple_gampad_read_buttons(controller);
+        usb_simple_gamepad_send(controller);
+    }
 
     for (;;)
     {
-        if (simple_gampad_read_buttons())
+        stateChanged = 0;
+        for (controller = 0; controller < CONTROLLER_COUNT; controller++) {
+            stateChangedController[controller] = simple_gampad_read_buttons(controller);
+            if (stateChangedController[controller]) {
+                stateChanged = 1;
+            }
+        }
+        if (stateChanged)
         {
-            // Send if state changed or if the host requested descriptors
-            // The time this send takes will work as simple debounce
-            usb_simple_gamepad_send();
-            noChangeCounter = 0;
+            for (controller = 0; controller < CONTROLLER_COUNT; controller++) {
+                // Send if state changed or if the host requested descriptors
+                // The time this send takes will work as simple debounce
+                if (stateChangedController[controller]) {
+                    usb_simple_gamepad_send(controller);
+                }
+            }
         }
         else
         {
@@ -91,7 +106,9 @@ int main(void)
             // Continue to transmit state every so often when there's no change
             if (++noChangeCounter >= NOCHANGE_TX_COUNT)
             {
-                usb_simple_gamepad_send();
+                for (controller = 0; controller < CONTROLLER_COUNT; controller++) {
+                    usb_simple_gamepad_send(controller);
+                }
                 noChangeCounter = 0;
             }
         }

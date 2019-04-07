@@ -104,16 +104,18 @@
    should have different Product IDs and names. The product ID 0x047A is the one
    used in the Teensy USB-to-Serial example code.
    */
-#define STR_MANUFACTURER    L"Manufacturer"
-#define STR_PRODUCT         L"Simple Gamepad"
-#define PRODUCT_ID          0x047A
+#define STR_MANUFACTURER    L"CodeIsALie"
+#define STR_PRODUCT         L"NEO-GEO USB Adapter v1.0"
 
 /* this sets the serial number string reported by the device */
 #define STR_SERIAL_NUMBER   L"00001"
 
 /* this setting determines the number of buttons defined and presented to the OS
    The minimum is 1. The maximum is 20. */
-#define BUTTON_COUNT    8
+#define BUTTON_COUNT    6
+
+/* this setting determines the number of controllers we can handle. */
+#define CONTROLLER_COUNT 2
 
 /* enables the internal pull-up resitors on all inputs when defined. Connecting
    the pin to ground activates the button. If this is 0, then extenal pull-up
